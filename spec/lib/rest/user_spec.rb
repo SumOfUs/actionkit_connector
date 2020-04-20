@@ -47,5 +47,49 @@ describe ActionKitConnector::REST::User do
       end
     end
   end
+
+  describe "#filter_user_orders_by" do
+    context 'with an email that already exists' do
+      it 'gets back all the orders associated with the user email' do
+        VCR.use_cassette('rest_user_filter_user_orders_by_email') do
+          resp = client.filter_user_orders_by(field: "user__email", value: 'test@example.com')
+          expect(resp.response.code.to_i).to eq 200
+          expect(resp.parsed_response["objects"].size).to eql 20
+          expect(resp.parsed_response["meta"]["total_count"]).to eql 35
+        end
+      end
+
+      it 'should return 0 records' do
+        VCR.use_cassette('rest_user_filter_user_orders_by_email_with_0_donations') do
+          resp = client.filter_user_orders_by(field: "user__email", value: 'test1@example.com')
+          expect(resp.response.code.to_i).to eq 200
+          expect(resp.parsed_response["objects"].size).to eql 0
+          expect(resp.parsed_response["meta"]["total_count"]).to eql 0
+        end
+      end
+    end
+
+    context 'with non existing user' do
+      it 'gets back all the orders associated with the user email' do
+        VCR.use_cassette('rest_user_filter_user_orders_by_email') do
+          resp = client.filter_user_orders_by(field: "user__email", value: 'test@example.com')
+          expect(resp.response.code.to_i).to eq 200
+          expect(resp.parsed_response["objects"].size).to eql 20
+          expect(resp.parsed_response["meta"]["total_count"]).to eql 35
+        end
+      end
+
+      it 'should return 0 records' do
+        VCR.use_cassette('rest_user_filter_user_orders_by_email_with_0_donations') do
+          resp = client.filter_user_orders_by(field: "user__email", value: 'test1@example.com')
+          expect(resp.response.code.to_i).to eq 200
+          expect(resp.parsed_response["objects"].size).to eql 0
+          expect(resp.parsed_response["meta"]["total_count"]).to eql 0
+        end
+      end
+    end
+  end
 end
+
+
 
